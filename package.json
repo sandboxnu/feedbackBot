@@ -1,0 +1,19 @@
+{
+  "name": "feedbackbot",
+  "version": "1.0.0",
+  "description": "Slack bot to get feedback from Sandbox members",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sandboxnu/feedbackBot.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sandboxnu/feedbackBot/issues"
+  },
+  "homepage": "https://github.com/sandboxnu/feedbackBot#readme"
+}
