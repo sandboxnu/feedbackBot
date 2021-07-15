@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/sandboxnu/feedbackBot/issues"
   },
-  "homepage": "https://github.com/sandboxnu/feedbackBot#readme"
+  "homepage": "https://github.com/sandboxnu/feedbackBot#readme",
+  "dependencies": {
+    "@slack/bolt": "^3.4.1"
+  }
 }
