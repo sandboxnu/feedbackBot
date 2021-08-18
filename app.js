@@ -18,6 +18,17 @@ console.log(message)
 // The echo command simply echoes on command
 app.command('/create-survey', generateCreateSurveyHandler(app));
 
+  app.action('surveyType-select', async ({ ack, payload, client }) => {
+    ack();
+    console.log(payload);
+    client.views.update({
+      view: {
+        ...payload.view,
+      }
+    })
+  });
+
+
 (async () => {
   // Start your app
   await app.start(process.env.PORT || 3000);

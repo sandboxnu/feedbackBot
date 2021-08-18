@@ -9,23 +9,139 @@ const isValidCreateCommandText = (text) => {
   return text && Object.values(VALID_OPTIONS).includes(text);
 }
 
-const generateCreateSurveyHandler = (app) => async ({ command, ack, respond }) => {
+const INITIAL_MODAL_BLOCKS = [
+		{
+			"type": "section",
+			"text": {
+				"type": "mrkdwn",
+				"text": "Let's get started making a feedback survey."
+			}
+		},
+		{
+			"type": "input",
+			"element": {
+				"type": "static_select",
+				"placeholder": {
+					"type": "plain_text",
+					"text": "Select an item",
+					"emoji": true
+				},
+				"options": [
+					{
+						"text": {
+							"type": "plain_text",
+							"text": "Multiple Choice",
+							"emoji": true
+						},
+						"value": "mc"
+					},
+					{
+						"text": {
+							"type": "plain_text",
+							"text": "Radio",
+							"emoji": true
+						},
+						"value": "radio"
+					}
+				],
+				"action_id": "surveyType-select"
+			},
+			"label": {
+				"type": "plain_text",
+				"text": "Survey Type",
+				"emoji": true
+			}
+		}
+	]
+
+
+const generateView = (blocks) => (
+{
+        "type": "modal",
+        "title": {
+          "type": "plain_text",
+          "text": "FeedbackBot"
+        },
+        "close": {
+          "type": "plain_text",
+          "text": "Close"
+        },
+        blocks
+      
+})
+
+const generateCreateSurveyHandler = (app) => async ({ command, client, ack, payload, respond }) => {
   // Acknowledge command request (required by slack API for commands)
   await ack();
 
-  if (!isValidCreateCommandText(command.text)) {
-    await respond(HELP_MESSAGE);
-    return;
+
+  try {
+    // Call the views.open method using the WebClient passed to listeners
+    const result = await client.views.open({
+      trigger_id: payload.trigger_id,
+      view:{
+  "type": "modal",
+  "callback_id": "modal-identifier",
+  "title": {
+    "type": "plain_text",
+    "text": "Just a modal"
+  },
+          "submit": {
+            "type": "plain_text",
+            "text": "Create"
+        },
+	"blocks": [
+		{
+			"type": "section",
+			"text": {
+				"type": "mrkdwn",
+				"text": "Let's get started making a feedback survey."
+			}
+		},
+		{
+			"type": "input",
+			"element": {
+				"type": "static_select",
+				"placeholder": {
+					"type": "plain_text",
+					"text": "Select an item",
+					"emoji": true
+				},
+				"options": [
+					{
+						"text": {
+							"type": "plain_text",
+							"text": "Multiple Choice",
+							"emoji": true
+						},
+						"value": "mc"
+					},
+					{
+						"text": {
+							"type": "plain_text",
+							"text": "Radio",
+							"emoji": true
+						},
+						"value": "radio"
+					}
+				],
+				"action_id": "surveyType-select"
+			},
+			"label": {
+				"type": "plain_text",
+				"text": "Survey Type",
+				"emoji": true
+			}
+		}
+	]
+}
+    });
+
+    console.log(result);
   }
-
-  const userID = command.user_id;
-
-  const res = await app.client.chat.postMessage({
-    channel: userID,
-    text: "pokemon unite"
-  })
-
-  console.log(res);
+  catch (error) {
+    console.log(error)
+  }
 }
 
 module.exports = generateCreateSurveyHandler;
