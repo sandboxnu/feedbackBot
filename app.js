@@ -1,4 +1,5 @@
 const { App } = require('@slack/bolt');
+const generateCreateSurveyHandler = require('./generateCreateSurveyHandler')
 
 const app = new App({
   token: process.env.SLACK_BOT_TOKEN,
@@ -15,16 +16,7 @@ console.log(message)
 });
 
 // The echo command simply echoes on command
-app.command('/create-survey', async ({ command, ack, respond }) => {
-  // Acknowledge command request
-  await ack();
-  if (!command.text || !(command.text.toLowerCase() === 'mc' || command.text.toLowerCase() === 'radio')) {
-    await respond("You must provide a survey type with the /create-survey command. Please either type \"/create-survey mc\" for multiple choice, or \"/create-survey radio\" for radio.");
-    return;
-  }
-
-  await respond(`${command.text}`);
-});
+app.command('/create-survey', generateCreateSurveyHandler(app));
 
 (async () => {
   // Start your app
