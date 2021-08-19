@@ -1,11 +1,12 @@
 const { App } = require('@slack/bolt');
 const generateCreateSurveyHandler = require('./generateCreateSurveyHandler')
+const generateNSizedIncreasingIntArrayStartingAt = require('./utils/generateNSizedIncreasingIntArrayStartingAt')
 
 const app = new App({
   token: process.env.SLACK_BOT_TOKEN,
   signingSecret: process.env.SLACK_SIGNING_SECRET,
   socketMode: true,
-  appToken: process.env.SLACK_APP_TOKEN
+  appToken: process.env.SLACK_APP_TOKEN,
 });
 
 // Listens to incoming messages that contain "hello"
@@ -18,15 +19,16 @@ console.log(message)
 // The echo command simply echoes on command
 app.command('/create-survey', generateCreateSurveyHandler(app));
 
-  app.action('surveyType-select', async ({ ack, payload, client }) => {
-    ack();
-    console.log(payload);
-    client.views.update({
-      view: {
-        ...payload.view,
-      }
-    })
-  });
+app.action('num-questions-select', async ({ ack }) => {
+  await ack();
+});
+
+// throwaway action handlers for selects that are non-interactive
+generateNSizedIncreasingIntArrayStartingAt(5, 1).forEach(i => {
+  app.action(`num-answers-Q${i}`, async ({ ack }) => await ack());
+});
+
+
 
 
 (async () => {
