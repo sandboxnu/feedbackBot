@@ -15,6 +15,21 @@ app.message('hello', async ({ message, say }) => {
   await say(`<@UM3U24PEY> just pooped his pants! OMG! 😱😱`);
 });
 
+//
+
+
+//
+
+
+
+//send user message
+app.message('goodbye', async ({ message, say }) => {
+  // say() sends a message to the channel where the event was triggered
+  console.log(message)
+  await send_form(["UMENGK7K8"], "title", [{"type": "radio", "answers": ["one", "two"], "question": "testq"}] );
+    
+});
+
 (async () => {
   // Start your app
   await app.start(process.env.PORT || 3000);
@@ -22,10 +37,48 @@ app.message('hello', async ({ message, say }) => {
   console.log('⚡️ Bolt app is running!');
 })();
 
+
+//send message to users
+async function send_form(users, title, questions) {
+  
+    const form = formJson(title, questions);
+    users.forEach(async (user) => {
+      console.log(user)
+      try {
+        console.log("boutta send it")
+        try {
+          await app.client.chat.postMessage( {
+            token: process.env.SLACK_APP_TOKEN,
+            "channel": user,
+            "blocks": form,
+            "text": "this is text"
+          })
+        }
+        catch(error) {
+          console.log(error)
+          console.log("bad")
+        }
+        console.log("sent")
+      }
+      catch {
+        console.log("big goof")
+      }
+      
+    });
+    console.log("u did it!")
+
+  
+  
+
+};
+
+
 //log form submissions
-/*
-app.action({}, async ({body, client, ack}) => {
+
+app.action('testq', async ({body, client, ack}) => { 
   await ack();
+  console.log(body.message)
+  /*
   try {
     if (body.message) {
       const result = await send_to_sheets({
@@ -39,8 +92,9 @@ app.action({}, async ({body, client, ack}) => {
   catch(error) {
     console.error(error);
   }
+  */
 });
-*/
+
 
 /*
 formJson: String JSON[] -> JSON
@@ -85,8 +139,8 @@ function formatQuestion({type, answers, question}) {
     "element": {
       "type": type,
       "options": options,
-      "action_id": label,
-      "label": plainText(label)
+      "action_id": question,
+      "label": plainText(question)
     }
   };
 
