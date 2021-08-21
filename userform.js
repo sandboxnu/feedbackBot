@@ -1,100 +1,28 @@
 
-const { App, ReceiverMultipleAckError } = require('@slack/bolt');
-const { verifySignatureAndParseRawBody } = require('@slack/bolt/dist/receivers/ExpressReceiver');
+/*actuve Surveys: 
+  stores aurveys responses that have not been submitted
+*/
+const activeSurveys = [];
+const divider = { 'type': 'divider' };
 
-const app = new App({
-  token: process.env.SLACK_BOT_TOKEN,
-  signingSecret: process.env.SLACK_SIGNING_SECRET,
-  socketMode: true,
-  appToken: process.env.SLACK_APP_TOKEN
-});
-
-// Listens to incoming messages that contain "hello"
-app.message('hello', async ({ message, say }) => {
-  // say() sends a message to the channel where the event was triggered
-  console.log(message)
-  await say(`<@UM3U24PEY> just pooped his pants! OMG! 😱😱`);
-});
-
-//
-
-
-//
-
-
-
-//send user message
-app.message('goodbye', async ({ message, say }) => {
-  // say() sends a message to the channel where the event was triggered
-  console.log(message)
-  await send_form(["UMENGK7K8"], "title", [{"type": "radio", "answers": ["one", "two"], "question": "testq"}] );
-    
-});
-
-(async () => {
-  // Start your app
-  await app.start(process.env.PORT || 3000);
-
-  console.log('⚡️ Bolt app is running!');
-})();
-
-
-//send message to users
-async function send_form(users, title, questions) {
-  
-    const form = formJson(title, questions);
-    users.forEach(async (user) => {
-      console.log(user)
-      try {
-        console.log("boutta send it")
-        try {
-          await app.client.chat.postMessage( {
-            "token": process.env.SLACK_APP_TOKEN,
-            "channel": user,
-            "blocks": form,
-            "text": "this is text"
-          })
-        }
-        catch(error) {
-          console.log(error)
-          console.log("bad")
-        }
-        console.log("sent")
-      }
-      catch {
-        console.log("big goof")
-      }
-      
-    });
-    console.log("u did it!")
-
-  
-  
-
-};
-
-
-//log form submissions
-
-app.action('testq', async ({body, client, ack}) => { 
-  await ack();
-  console.log(body.message)
-  /*
-  try {
-    if (body.message) {
-      const result = await send_to_sheets({
-        body
+const generateUserFormHandler = (app) => async ({ users, title, questions }) => {
+  const form = formJson(title, questions);
+  users.forEach((user) => {
+    try {
+      await app.client.chat.postMessage({
+        "channel": user,
+        "blocks": form,
+        "text": "this is text"
       });
-
-      console.log(result);
     }
-  }
+    catch (error) {
+      console.log(error)
+    }
+  })
 
-  catch(error) {
-    console.error(error);
-  }
-  */
-});
+}
+
+
 
 
 /*
@@ -107,16 +35,33 @@ where each element in questions has the form: {
 returns the array of blocks for an interactive message
 */
 
-function formJson(title, questions) {
+
+const formJson = (title, questions) => {
   const blocks = [];
+
   blocks.push({
     "type": "header",
     "text": plainText(title)
   });
 
+  blocks.push(divider);
+
+
   questions.forEach((question) => {
-    blocks.push(formatQuestion(question))
+    blocks.push(formatQuestion(question));
+    blocks.push(divider);
   });
+
+  blocks.push({
+    "type": "actions",
+    "elements": [
+      {
+        "type": "button",
+        "text": plainText("Submit Response"),
+        "value": "Submision",
+        "action_id": "survey submit"
+      }
+    ]});
 
   return blocks;
 }
@@ -126,7 +71,7 @@ function formJson(title, questions) {
 formatQuestion: ({String, String[], String}) -> JSON
 returns the JSON block for the given question
 */
-function formatQuestion({type, answers, question}) {
+const formatQuestion = ({ type, answers, question }) => {
   const options = [];
   answers.forEach((text) => {
     options.push({
@@ -140,7 +85,7 @@ function formatQuestion({type, answers, question}) {
     "element": {
       "type": type,
       "options": options,
-      "action_id": question,
+      "action_id": 'selection changed',
       "label": plainText(question)
     }
   };
@@ -151,7 +96,7 @@ function formatQuestion({type, answers, question}) {
 plainText: String -> JSON
 returns a simple plain text block
  */
-function plainText(text) {
+const plainText = (text) => {
   return {
     "type": "plain_text",
     "text": text,
@@ -159,3 +104,4 @@ function plainText(text) {
   };
 }
 
+module.exports = generateUserFormHandler;
