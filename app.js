@@ -1,6 +1,5 @@
 const { App, onlyViewActions } = require('@slack/bolt');
-const generateCreateSurveyHandler = require('./generateCreateSurveyHandler')
-const generateNumQuestionsSelectHandler = require('./generateNumQuestionsSelectHandler')
+const { numQuestionsSelectHandler, createSurveyHandler } = require('./creationFormHandlers')
 const generateNSizedIncreasingIntArrayStartingAt = require('./utils/generateNSizedIncreasingIntArrayStartingAt')
 
 const app = new App({
@@ -19,8 +18,8 @@ console.log(message)
 
 
 // Creation form handlers
-app.command('/create-survey', generateCreateSurveyHandler(app));
-app.action('num-questions-select', generateNumQuestionsSelectHandler(app));
+app.command('/create-survey', createSurveyHandler);
+app.action('num-questions-select', numQuestionsSelectHandler);
 // throwaway action handlers for selects that are non-interactive
 generateNSizedIncreasingIntArrayStartingAt(5, 1).forEach(i => {
   app.action(`num-answers-Q${i}`, async ({ ack }) => await ack());
