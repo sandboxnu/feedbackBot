@@ -24,7 +24,7 @@ const generateAnswerObject = (answerNumber) => ({
 
 const generateAnswerSection = (numAnswers) => generateNSizedIncreasingIntArrayStartingAt(numAnswers, 1).map(generateAnswerObject)
 
-const generateSingleQuestionSection = (questionNumber, numAnswers = 2) => [
+const generateSingleQuestionSection = (questionNumber, numAnswers) => [
 	{
 		"type": "header",
 		"text": {
@@ -96,7 +96,7 @@ const generateSingleQuestionSection = (questionNumber, numAnswers = 2) => [
 ]
 
 const generateQuestionsSection = (numQuestions) =>
-	generateNSizedIncreasingIntArrayStartingAt(numQuestions, 1).reduce((acc, questionNumber) => [...acc, ...generateSingleQuestionSection(questionNumber)], []);
+	generateNSizedIncreasingIntArrayStartingAt(numQuestions, 1).reduce((acc, questionNumber) => [...acc, ...generateSingleQuestionSection(questionNumber, 2)], []);
 
 const addHeader = (restOfModal) => [
 	{
@@ -119,7 +119,6 @@ const addHeader = (restOfModal) => [
 ]
 
 const INITIAL_MODAL_BLOCKS = generateQuestionsSection(1);
-const VIEW_ID = 'feedbackbot-modal'
 
 const generateView = (questionBlocks) => (
 	{
@@ -133,13 +132,52 @@ const generateView = (questionBlocks) => (
 			"type": "plain_text",
 			"text": "Create"
 		},
-		"external_id": VIEW_ID,
 		blocks: addHeader(questionBlocks),
 	});
+
+
+// UPDATE HANDLERS -----------------------------
+
+const updateViewNumQuestions = (view, newNumQuestions) => {
+	const { id, team_id, blocks, close, state, hash, previous_view_id, root_view_id, app_id, app_installed_team_id, bot_id, ...usableViewValues } = view;
+	return {
+		...usableViewValues,
+		blocks: updateBlocksNumQuestions(blocks, newNumQuestions)
+	}
+}
+
+const isQuestionHeaderBlock = (block, number = undefined) => 
+	block.type === 'header' && block.text && block.text.text && block.text.text.includes(number ? `Question ${number}` : 'Question');
+
+const updateBlocksNumQuestions = (blocks, newNumQuestions) => {
+	const prevNumberQuestions = blocks.reduce((seen, cur) => isQuestionHeaderBlock(cur) ? seen + 1 : seen, 0);
+	const questionDifference = newNumQuestions - prevNumberQuestions;
+
+	console.log(prevNumberQuestions, newNumQuestions)
+
+	if (questionDifference === 0) {
+		return blocks;
+	} else if (questionDifference < 0) {
+		const lastBlockIndex = blocks.findIndex((block) => isQuestionHeaderBlock(block, newNumQuestions + 1));
+		console.log(lastBlockIndex)
+		return blocks.slice(0, lastBlockIndex);
+	} else {
+		return [
+			...blocks, 
+			...generateNSizedIncreasingIntArrayStartingAt(questionDifference, prevNumberQuestions + 1)
+				.reduce((acc, questionNumber) => [...acc, ...generateSingleQuestionSection(questionNumber, 2)], [])
+		]
+	}
+}
+
+const updateViewNumAnswersForQuestion = (view, questionNumber, newNumAnswers) => {
+
+}
 
 module.exports = {
     generateView,
 	generateQuestionsSection,
-	VIEW_ID,
+	updateViewNumQuestions,
+	updateViewNumAnswersForQuestion,
 	INITIAL_MODAL_BLOCKS
 }

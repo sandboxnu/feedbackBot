@@ -1,4 +1,4 @@
-const { generateView, generateQuestionsSection, VIEW_ID, INITIAL_MODAL_BLOCKS } = require('./utils/blocks')
+const { generateView, INITIAL_MODAL_BLOCKS, updateViewNumAnswersForQuestion, updateViewNumQuestions } = require('./utils/blocks')
 
 const createSurveyHandler = async ({ client, ack, payload }) => {
 	// Acknowledge command request (required by slack API for commands)
@@ -16,18 +16,30 @@ const createSurveyHandler = async ({ client, ack, payload }) => {
 	}
 }
 
-const numQuestionsSelectHandler = async ({ack, client, payload}) => {
+const numQuestionsSelectHandler = async ({ack, client, payload, body}) => {
   await ack();
 
   const newNumQuestions = parseInt(payload.selected_option.value)
   
   await client.views.update({
-      external_id: VIEW_ID,
-      view: generateView(generateQuestionsSection(newNumQuestions))
+      view_id: body.view.id,
+      view: updateViewNumQuestions(body.view, newNumQuestions)
+  })
+}
+
+const generateNumAnswersHandler = (questionNumber) => async ({ack, payload, client, body}) => {
+    await ack();
+
+    const newNumAnswers = parseInt(payload.selected_option.value);
+
+  await client.views.update({
+      view_id: body.view.id,
+      view: updateViewNumAnswersForQuestion(body.view, questionNumber, newNumAnswers)
   })
 }
 
 module.exports = {
     createSurveyHandler,
     numQuestionsSelectHandler,
+    generateNumAnswersHandler,
 }
