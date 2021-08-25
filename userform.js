@@ -2,10 +2,10 @@
 /*actuve Surveys: 
   stores aurveys responses that have not been submitted
 */
-const activeSurveys = [];
 const divider = { 'type': 'divider' };
 
-const generateUserFormHandler = (app) => async ({ users, title, questions }) => {
+const generateUserForm = async ({ users, title, questions }) => {
+  
   const form = formJson(title, questions);
   users.forEach((user) => {
     try {
@@ -104,4 +104,4 @@ const plainText = (text) => {
   };
 }
 
-module.exports = generateUserFormHandler;
+module.exports = generateUserForm;

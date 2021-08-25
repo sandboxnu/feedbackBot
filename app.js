@@ -16,16 +16,6 @@ app.message('hello', async ({ message, say }) => {
   await say(`<@UM3U24PEY> just pooped his pants! OMG! 😱😱`);
 });
 
-app.action('selection changed', async ({ ack }) => {
-  await ack();
-});
-
-app.action('survey submit', async ({ ack }) => {
-  await ack();
-  logResponse();
-});
-
-
 (async () => {
   // Start your app
   await app.start(process.env.PORT || 3000);
@@ -35,21 +25,22 @@ app.action('survey submit', async ({ ack }) => {
 
 
 //Ack selections
-app.action({ action_id: 'selection changed' }, 
-  async ({ ack }) => { 
+app.action({ action_id: 'selection changed' },
+  async ({ ack }) => {
     await ack();
   });
 
-  //handle submissions
-  app.action({ action_id: 'survey submit' },
+//handle submissions
+app.action({ action_id: 'survey submit' },
   async ({ body, client, ack }) => {
     await ack();
     try {
-      if(body.message) {
-        const 
+      if (body.message) {
+        //parse and store data 
+
       }
     }
-    catch(error) {
+    catch (error) {
       console.log(error);
     }
 
